@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import polars as pl
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
@@ -25,23 +26,25 @@ def inicializar_sistema():
     analizador = AnalizadorInventario(ruta_data)
     analizador.dm.procesar_inventario()
     
-    # Robustez: Solo aplicar clustering si hay suficientes datos
-    if analizador.dm.data is not None and len(analizador.dm.data) >= 3:
-        if 'cluster_km' not in analizador.dm.data.columns:
-            # Limpieza de datos antes del fit (eliminar nulos)
-            X_df = analizador.dm.data.select(['precio_medio', 'unidades_vendidas']).drop_nulls()
-            
-            if len(X_df) >= 3:
-                X = X_df.to_pandas()
+    # Robustez total para el clustering
+    if analizador.dm.data is not None:
+        # 1. Limpiamos nulos del dataframe principal para evitar desajustes de tamaño
+        analizador.dm.data = analizador.dm.data.drop_nulls()
+        
+        # 2. Solo aplicamos K-Means si hay suficientes datos (mínimo 3 filas)
+        if len(analizador.dm.data) >= 3 and 'cluster_km' not in analizador.dm.data.columns:
+            try:
+                X = analizador.dm.data.select(['precio_medio', 'unidades_vendidas']).to_pandas()
                 kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
-                # Volvemos a asignar los clusters (unimos por posición si es necesario, 
-                # pero aquí data_manager ya debería estar limpio)
+                clusters = kmeans.fit_predict(X)
                 analizador.dm.data = analizador.dm.data.with_columns(
-                    cluster_km = pl.Series(kmeans.fit_predict(X))
+                    cluster_km = pl.Series(clusters)
                 )
+            except Exception as e:
+                print(f"⚠️ No se pudo aplicar K-Means: {e}")
+                
     return analizador
 
-import polars as pl # Asegurar polars disponible para el parche
 analizador = inicializar_sistema()
 
 # Interfaz
@@ -64,14 +67,15 @@ with tab2:
             fig = make_subplots(rows=1, cols=2, subplot_titles=("Pareto (Negocio)", "K-Means (ML)"))
             
             # Agregaciones Pareto
-            df_p = df.groupby("clase_pareto")["unidades_vendidas"].sum().reset_index()
-            fig.add_trace(go.Bar(x=df_p["clase_pareto"], y=df_p["unidades_vendidas"], name="Pareto"), row=1, col=1)
+            if "clase_pareto" in df.columns:
+                df_p = df.groupby("clase_pareto")["unidades_vendidas"].sum().reset_index()
+                fig.add_trace(go.Bar(x=df_p["clase_pareto"], y=df_p["unidades_vendidas"], name="Pareto"), row=1, col=1)
 
-            # Agregaciones K-Means (solo si existe la columna)
+            # Agregaciones K-Means
             if "cluster_km" in df.columns:
                 df_k = df.groupby("cluster_km")["unidades_vendidas"].sum().reset_index()
                 fig.add_trace(go.Bar(x=df_k["cluster_km"].astype(str), y=df_k["unidades_vendidas"], name="K-Means"), row=1, col=2)
             
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.warning("No hay datos cargados para analizar.")
+            st.warning("No hay datos suficientes para mostrar la comparativa.")
