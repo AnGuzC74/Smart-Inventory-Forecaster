@@ -1,63 +1,41 @@
-# Smart-Inventory-Forecaster 📦🚀
+# Smart Inventory Management System 📦🤖 (Rama: feat/inventario-masivo-rich)
 
-Este proyecto implementa un pipeline industrial de Machine Learning para la predicción de inventario inteligente, integrando un backend robusto con FastAPI y una interfaz interactiva con Streamlit.
+Este repositorio contiene un sistema híbrido de inteligencia artificial para la gestión y predicción de inventarios industriales. Combina modelos de Machine Learning tradicionales con las capacidades de razonamiento de Grandes Modelos de Lenguaje (LLM).
 
-## 🛠️ Tecnologías Utilizadas
-- **Python 3.9+**
-- **FastAPI**: Backend para servir el modelo.
-- **Streamlit**: Dashboard interactivo para el usuario final.
-- **Scikit-Learn**: Modelo de Random Forest para predicción de demanda.
-- **Docker**: Containerización para despliegue consistente.
+> **ESTADO DE LA RAMA:** 🛠️ **Desarrollo Activo.** Esta rama está destinada a la implementación de mejoras para el procesamiento de Big Data e inventarios masivos.
 
-## 📂 Estructura del Proyecto
-```text
-Smart-Inventory-Forecaster/
-├── assets/                 # Capturas de pantalla y multimedia
-├── analizador.py           # Lógica del modelo ML y procesamiento
-├── app.py                  # API REST con FastAPI
-├── interfaz.py             # Dashboard en Streamlit
-├── verificador_ops.py      # Auditoría de MLOps y entrenamiento
-├── requirements.txt        # Dependencias del proyecto
-└── Dockerfile              # Configuración de Docker
-```
+## 🚀 Componentes del Sistema
 
-## 🚀 Cómo Ejecutar
+1.  **Motor de Predicción (Random Forest)**: Localizado en `analizador.py`. Utiliza un algoritmo de regresión para estimar el stock óptimo basándose en el costo y la prioridad del repuesto.
+2.  **API REST (FastAPI)**: Servida a través de `app.py`. Proporciona endpoints robustos para realizar predicciones en tiempo real.
+3.  **Agente de Inventario (LLM)**: Implementado en `agente_inventario.py`. Utiliza Ollama (Llama 3.2) para extraer datos de lenguaje natural y proporcionar justificaciones técnicas a las decisiones de stock.
+4.  **Validación de Datos (Pydantic)**: Definida en `esquemas.py` para asegurar la integridad de las entradas y salidas del sistema.
 
-### Con Docker (Recomendado)
-1. Construir la imagen:
-   ```bash
-   docker build -t inventory-forecaster .
-   ```
-2. Ejecutar el contenedor:
-   ```bash
-   docker run -p 8501:8501 inventory-forecaster
-   ```
+## 🛠️ Instalación y Uso
 
-### Localmente
+### Requisitos Previos
+- Python 3.9+
+- Ollama instalado y con el modelo `llama3.2` descargado.
+
+### Configuración
 1. Instalar dependencias:
    ```bash
    pip install -r requirements.txt
    ```
-2. Ejecutar el verificador de MLOps:
+2. Iniciar el servidor API:
    ```bash
-   python verificador_ops.py
+   python app.py
    ```
-3. Iniciar la interfaz:
+3. Ejecutar el Agente en otra terminal:
    ```bash
-   streamlit run interfaz.py
+   python agente_inventario.py
    ```
 
-## 📸 Galería de la Interfaz
-
-A continuación se muestran capturas del sistema en funcionamiento:
-
-| Descripción | Imagen |
-|-------------|--------|
-| **Dashboard Principal** | ![Dashboard](./assets/Imagen_1.png) |
-| **Análisis de Datos** | ![Análisis](./assets/Imagen_2.png) |
-| **Configuración de Parámetros** | ![Configuración](./assets/Imagen_3.png) |
-| **Resultados de Predicción** | ![Predicción](./assets/Imagen_4.png) |
-| **Intervalos de Confianza** | ![Estadísticas](./assets/Imagen_5.png) |
+## 📈 Próximos Pasos
+- Migración a procesamiento de Big Data.
+- Mejora de la interfaz con reportes visuales masivos.
+- Optimización de los prompts del agente.
 
 ---
-Desarrollado para el portafolio de **Laboratorio DS**.
+*Versión Estable 1.0 - Core Funcional (API + LLM + RF)*  
+*Nota: Actualmente trabajando en mejoras masivas en esta rama.*
