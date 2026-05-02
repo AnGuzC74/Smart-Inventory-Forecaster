@@ -1,37 +1,36 @@
-import os
-import time
 import subprocess
-import requests
+import time
+import sys
+import os
 
-def print_banner():
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print("====================================================")
-    print("      📦 OLIST SMART INVENTORY SIMULATOR           ")
-    print("====================================================")
-    print("Iniciando servicios distribuidos...\n")
+def ejecutar_aplicacion():
+    # Detectar la ruta del proyecto
+    ruta_base = os.path.dirname(os.path.abspath(__file__))
+    
+    print("🛰️ Iniciando sistema Olist Pro...")
 
-def start_services():
-    print("🚀 [1/3] Lanzando Cerebro Desacoplado (FastAPI)...")
-    # In reality, we'd use Popen but for a script we simulate the flow
-    # subprocess.Popen(["python", "app.py"]) 
-    time.sleep(1)
+    # 1. Iniciar el Backend (El Cerebro)
+    print("🧠 Paso 1: Cargando datos y modelos en FastAPI...")
+    api_proc = subprocess.Popen([sys.executable, "api.py"], cwd=ruta_base)
     
-    print("🧠 [2/3] Cargando 100k registros en RAM (Simulado)...")
-    time.sleep(2)
-    
-    print("🤖 [3/3] Conectando con Llama 3.2 vía Ollama...")
-    time.sleep(1)
-    print("\n✅ Sistema Listo para operación masiva.\n")
+    # Tiempo de gracia para que la RAM se llene con los 100k registros
+    time.sleep(7) 
+
+    # 2. Iniciar el Frontend (La Interfaz)
+    print("📊 Paso 2: Lanzando Dashboard en Streamlit...")
+    ui_proc = subprocess.Popen([sys.executable, "-m", "streamlit", "run", "app.py"], cwd=ruta_base)
+
+    print("\n✅ Todo listo. La simulación está corriendo.")
+    print("Presiona CTRL+C en esta terminal para apagar todos los servicios.")
+
+    try:
+        # Mantener el script activo mientras ambos procesos funcionen
+        api_proc.wait()
+        ui_proc.wait()
+    except KeyboardInterrupt:
+        print("\n🛑 Apagando servicios de forma segura...")
+        api_proc.terminate()
+        ui_proc.terminate()
 
 if __name__ == "__main__":
-    print_banner()
-    start_services()
-    
-    print("─"*50)
-    print("SISTEMA DE SEGMENTACIÓN DUAL ACTIVADO")
-    print("Pareto ABC: [OK]")
-    print("K-Means Clustering: [OK]")
-    print("─"*50)
-    
-    print("\nEjecuta 'agente_inventario.py' para interactuar con la IA.")
-    print("Simulación terminada.")
+    ejecutar_aplicacion()
