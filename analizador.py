@@ -10,13 +10,10 @@ class AnalizadorInventario:
         self.archivo_modelo = "modelo_inventario.joblib"
 
     def entrenar(self):
-        # Simulación de carga masiva (Olist dataset style)
-        print("Cargando y procesando 100,000 registros para entrenamiento masivo...")
-        n = 100000
         data = {
-            'costo': np.random.uniform(10, 2000, n),
-            'prioridad_encoded': np.random.randint(1, 4, n),
-            'stock_optimo': np.random.randint(1, 50, n)
+            'costo': [100, 500, 1000, 200, 800, 1500, 50, 300],
+            'prioridad_encoded': [1, 2, 3, 1, 2, 3, 1, 2],
+            'stock_optimo': [15, 8, 3, 12, 6, 2, 20, 10]
         }
         df = pd.DataFrame(data)
         X = df[['costo', 'prioridad_encoded']]
