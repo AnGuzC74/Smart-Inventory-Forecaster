@@ -7,3 +7,5 @@ joblib
 requests
 matplotlib
 seaborn
+numpy
+ollama
