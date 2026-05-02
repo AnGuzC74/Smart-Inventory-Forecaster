@@ -25,15 +25,23 @@ def inicializar_sistema():
     analizador = AnalizadorInventario(ruta_data)
     analizador.dm.procesar_inventario()
     
-    # Inyección de clustering si no existe en el dataframe
-    if 'cluster_km' not in analizador.dm.data.columns:
-        X = analizador.dm.data.select(['precio_medio', 'unidades_vendidas']).to_pandas()
-        kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
-        analizador.dm.data = analizador.dm.data.with_columns(
-            cluster_km = kmeans.fit_predict(X)
-        )
+    # Robustez: Solo aplicar clustering si hay suficientes datos
+    if analizador.dm.data is not None and len(analizador.dm.data) >= 3:
+        if 'cluster_km' not in analizador.dm.data.columns:
+            # Limpieza de datos antes del fit (eliminar nulos)
+            X_df = analizador.dm.data.select(['precio_medio', 'unidades_vendidas']).drop_nulls()
+            
+            if len(X_df) >= 3:
+                X = X_df.to_pandas()
+                kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+                # Volvemos a asignar los clusters (unimos por posición si es necesario, 
+                # pero aquí data_manager ya debería estar limpio)
+                analizador.dm.data = analizador.dm.data.with_columns(
+                    cluster_km = pl.Series(kmeans.fit_predict(X))
+                )
     return analizador
 
+import polars as pl # Asegurar polars disponible para el parche
 analizador = inicializar_sistema()
 
 # Interfaz
@@ -50,15 +58,20 @@ with tab1:
 
 with tab2:
     if st.button("Ver Comparativa Pareto vs K-Means"):
-        df = pd.DataFrame(analizador.dm.data.to_dicts())
-        
-        fig = make_subplots(rows=1, cols=2, subplot_titles=("Pareto (Negocio)", "K-Means (ML)"))
-        
-        # Agregaciones
-        df_p = df.groupby("clase_pareto")["unidades_vendidas"].sum().reset_index()
-        df_k = df.groupby("cluster_km")["unidades_vendidas"].sum().reset_index()
+        if analizador.dm.data is not None:
+            df = pd.DataFrame(analizador.dm.data.to_dicts())
+            
+            fig = make_subplots(rows=1, cols=2, subplot_titles=("Pareto (Negocio)", "K-Means (ML)"))
+            
+            # Agregaciones Pareto
+            df_p = df.groupby("clase_pareto")["unidades_vendidas"].sum().reset_index()
+            fig.add_trace(go.Bar(x=df_p["clase_pareto"], y=df_p["unidades_vendidas"], name="Pareto"), row=1, col=1)
 
-        fig.add_trace(go.Bar(x=df_p["clase_pareto"], y=df_p["unidades_vendidas"], name="Pareto"), row=1, col=1)
-        fig.add_trace(go.Bar(x=df_k["cluster_km"].astype(str), y=df_k["unidades_vendidas"], name="K-Means"), row=1, col=2)
-        
-        st.plotly_chart(fig, use_container_width=True)
+            # Agregaciones K-Means (solo si existe la columna)
+            if "cluster_km" in df.columns:
+                df_k = df.groupby("cluster_km")["unidades_vendidas"].sum().reset_index()
+                fig.add_trace(go.Bar(x=df_k["cluster_km"].astype(str), y=df_k["unidades_vendidas"], name="K-Means"), row=1, col=2)
+            
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("No hay datos cargados para analizar.")
