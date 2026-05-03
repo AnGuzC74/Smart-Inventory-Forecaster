@@ -3,6 +3,7 @@ import joblib
 import os
 import math
 import ollama
+import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 from core.data_manager import DataManager
@@ -13,16 +14,26 @@ class AnalizadorInventario:
         self.ruta_modelo = os.path.join("models", "modelo_inventario_rf.joblib")
 
     def predecir_stock(self, precio_nuevo):
-        """Carga el modelo y predice con redondeo superior."""
+        """Carga el modelo y predice con redondeo superior. Auto-sana si hay error de versión."""
         if not os.path.exists(self.ruta_modelo):
-            # Auto-entrenar si no existe
-            print("⚠️ Modelo no encontrado. Iniciando entrenamiento de emergencia...")
+            print("⚠️ Modelo no encontrado. Entrenando...")
             self.entrenar_y_salvar()
         
-        payload = joblib.load(self.ruta_modelo)
-        modelo_cargado = payload["model"]
-        prediccion = modelo_cargado.predict([[precio_nuevo]])[0]
-        return math.ceil(prediccion)
+        try:
+            payload = joblib.load(self.ruta_modelo)
+            modelo_cargado = payload["model"]
+            # Intentar predicción
+            prediccion = modelo_cargado.predict(np.array([[precio_nuevo]]))[0]
+            return math.ceil(prediccion)
+        except (AttributeError, ValueError, KeyError) as e:
+            # Si el modelo guardado es incompatible con la versión actual de sklearn
+            print(f"⚠️ Error de compatibilidad ({e}). Re-entrenando modelo en caliente...")
+            self.entrenar_y_salvar()
+            # Reintento tras re-entrenar
+            payload = joblib.load(self.ruta_modelo)
+            modelo_cargado = payload["model"]
+            prediccion = modelo_cargado.predict(np.array([[precio_nuevo]]))[0]
+            return math.ceil(prediccion)
 
     def obtener_recomendacion_agente(self, precio, prediccion, r2):
         """Consulta al agente IA con un enfoque de optimización logística."""
