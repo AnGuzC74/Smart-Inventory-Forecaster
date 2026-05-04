@@ -19,5 +19,16 @@ Para ver la aplicación en funcionamiento (simulación completa), ejecute:
 python simulador.py
 ```
 
+## ☁️ Configuración de IA Cloud (Opcional)
+Para habilitar los **IA Insights** en Streamlit Cloud:
+1. Ve a **Settings** > **Secrets** en tu panel de Streamlit.
+2. Agrega tu clave (OpenAI o compatible):
+   ```toml
+   OPENAI_API_KEY = "tu_clave_aqui"
+   OPENAI_BASE_URL = "https://api.openai.com/v1" # O la de Groq/Perplexity
+   CLOUD_MODEL_NAME = "gpt-3.5-turbo"
+   ```
+Si no se configuran secretos, la aplicación usará un mensaje técnico estándar sin fallar.
+
 ---
-*Rama: feat/olist-smart-inventory - Fase Avanzada*
+*Rama: feat/olist-smart-inventory - Fase Avanzada (Cloud Ready)*
