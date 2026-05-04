@@ -8,4 +8,6 @@ requests
 matplotlib
 seaborn
 numpy
-ollama
+openai
+fastapi
+uvicorn
