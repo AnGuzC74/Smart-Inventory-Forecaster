@@ -39,3 +39,7 @@ Este repositorio contiene un sistema híbrido de inteligencia artificial para la
 ---
 *Versión Estable 1.0 - Core Funcional (API + LLM + RF)*  
 *Nota: Actualmente trabajando en mejoras masivas en esta rama.*
+
+
+## 📄 Licencia
+Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
