@@ -47,3 +47,7 @@ python simulador.py
 
 ---
 *Desarrollado para el portafolio profesional de MLOps & AI Engineering.*
+
+
+## 📄 Licencia
+Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
