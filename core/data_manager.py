@@ -24,8 +24,10 @@ class DataManager:
             try:
                 # Lectura rápida de headers
                 headers = pl.read_csv(ruta, n_rows=1).columns
-                if "price" in headers: path_v = ruta
-                elif "product_category_name" in headers: path_p = ruta
+                if "price" in headers:
+                    path_v = ruta
+                elif "product_category_name" in headers:
+                    path_p = ruta
             except Exception as e:
                 logger.error(f"Error al leer cabecera del archivo {f}: {e}", exc_info=True)
                 continue

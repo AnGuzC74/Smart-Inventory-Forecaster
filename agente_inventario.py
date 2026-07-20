@@ -2,6 +2,9 @@ import ollama
 import requests
 import json
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 MODELO_OLLAMA = "llama3.2" 
 
@@ -32,8 +35,10 @@ if __name__ == "__main__":
 
     while True:
         user_input = input("👉 SOLICITUD: ")
-        if user_input.lower() in ['salir', 'exit', 'quit']: break
-        if not user_input.strip(): continue
+        if user_input.lower() in ['salir', 'exit', 'quit']:
+            break
+        if not user_input.strip():
+            continue
 
         print("⏳ Procesando...")
         try:
@@ -53,7 +58,8 @@ if __name__ == "__main__":
             print(f"🛡️ RANGO: [{res_api['limite_inferior']} - {res_api['limite_superior']}]")
             print(f"💡 ANÁLISIS: {explicacion}")
             print("─"*50 + "\n")
-        except:
+        except Exception as e:
+            logger.error(f"No se pudo procesar la solicitud del usuario: {e}", exc_info=True)
             print("⚠️ No pude entender la solicitud.")
 
     print("Programa finalizado.")

@@ -1,0 +1,153 @@
+From 014adc951a004f0753a7f9f841fe4e84de8535d3 Mon Sep 17 00:00:00 2001
+From: "Claude (asistente)" <assistant@anthropic.com>
+Date: Mon, 20 Jul 2026 03:01:27 +0000
+Subject: [PATCH] chore: limpieza completa de lint con ruff (13/13 errores
+ corregidos, tests verificados)
+
+---
+ agente_inventario.py | 12 +++++++++---
+ api.py               |  2 +-
+ core/__init__.py     |  4 ++--
+ core/data_manager.py |  6 ++++--
+ launcher.py          |  4 ++--
+ test_backend.py      |  4 ++--
+ utils/helpers.py     |  3 ++-
+ verificador_ops.py   |  2 +-
+ 8 files changed, 23 insertions(+), 14 deletions(-)
+
+diff --git a/agente_inventario.py b/agente_inventario.py
+index b9ccaf0..9112c7c 100644
+--- a/agente_inventario.py
++++ b/agente_inventario.py
+@@ -2,6 +2,9 @@ import ollama
+ import requests
+ import json
+ import os
++import logging
++
++logger = logging.getLogger(__name__)
+ 
+ MODELO_OLLAMA = "llama3.2" 
+ 
+@@ -32,8 +35,10 @@ if __name__ == "__main__":
+ 
+     while True:
+         user_input = input("👉 SOLICITUD: ")
+-        if user_input.lower() in ['salir', 'exit', 'quit']: break
+-        if not user_input.strip(): continue
++        if user_input.lower() in ['salir', 'exit', 'quit']:
++            break
++        if not user_input.strip():
++            continue
+ 
+         print("⏳ Procesando...")
+         try:
+@@ -53,7 +58,8 @@ if __name__ == "__main__":
+             print(f"🛡️ RANGO: [{res_api['limite_inferior']} - {res_api['limite_superior']}]")
+             print(f"💡 ANÁLISIS: {explicacion}")
+             print("─"*50 + "\n")
+-        except:
++        except Exception as e:
++            logger.error(f"No se pudo procesar la solicitud del usuario: {e}", exc_info=True)
+             print("⚠️ No pude entender la solicitud.")
+ 
+     print("Programa finalizado.")
+diff --git a/api.py b/api.py
+index b9cc425..e9867ae 100644
+--- a/api.py
++++ b/api.py
+@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
+ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ sys.path.insert(0, BASE_DIR)
+ 
+-from core.analyzer import AnalizadorInventario
++from core.analyzer import AnalizadorInventario  # noqa: E402 (requiere sys.path.insert previo)
+ 
+ app = FastAPI(title="MLOps Inventory Backend - Cloud IA Ready")
+ 
+diff --git a/core/__init__.py b/core/__init__.py
+index 9a32bf4..c72f9ff 100644
+--- a/core/__init__.py
++++ b/core/__init__.py
+@@ -1,2 +1,2 @@
+-from core.analyzer import AnalizadorInventario
+-from core.data_manager import DataManager
++from core.analyzer import AnalizadorInventario as AnalizadorInventario
++from core.data_manager import DataManager as DataManager
+diff --git a/core/data_manager.py b/core/data_manager.py
+index d39defd..986b784 100644
+--- a/core/data_manager.py
++++ b/core/data_manager.py
+@@ -24,8 +24,10 @@ class DataManager:
+             try:
+                 # Lectura rápida de headers
+                 headers = pl.read_csv(ruta, n_rows=1).columns
+-                if "price" in headers: path_v = ruta
+-                elif "product_category_name" in headers: path_p = ruta
++                if "price" in headers:
++                    path_v = ruta
++                elif "product_category_name" in headers:
++                    path_p = ruta
+             except Exception as e:
+                 logger.error(f"Error al leer cabecera del archivo {f}: {e}", exc_info=True)
+                 continue
+diff --git a/launcher.py b/launcher.py
+index 4405e1c..6a09ef9 100644
+--- a/launcher.py
++++ b/launcher.py
+@@ -33,8 +33,8 @@ def iniciar_sistema():
+     # 2. Iniciar Streamlit
+     print("📊 Iniciando interfaz de usuario...")
+     app_path = os.path.join(BASE_DIR, "app.py")
+-    # Ejecutamos el comando 'streamlit run app.py'
+-    subprocess.Popen(["streamlit", "run", "app.py"], cwd=BASE_DIR)
++    # Ejecutamos el comando 'streamlit run app.py' usando la ruta absoluta ya calculada
++    subprocess.Popen(["streamlit", "run", app_path], cwd=BASE_DIR)
+ 
+     print("\n🔥 Todo listo. Revisa tu navegador.")
+ 
+diff --git a/test_backend.py b/test_backend.py
+index d48858f..74c7801 100644
+--- a/test_backend.py
++++ b/test_backend.py
+@@ -7,8 +7,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ if BASE_DIR not in sys.path:
+     sys.path.insert(0, BASE_DIR)
+ 
+-from core.analyzer import AnalizadorInventario
+-from core.data_manager import DataManager
++from core.analyzer import AnalizadorInventario  # noqa: E402 (requiere sys.path.insert previo)
++from core.data_manager import DataManager  # noqa: E402 (requiere sys.path.insert previo)
+ 
+ def test_kmeans_and_pareto_flow():
+     """Prueba que el procesamiento de datos y la segmentación K-Means funcionan de verdad y generan las columnas correspondientes."""
+diff --git a/utils/helpers.py b/utils/helpers.py
+index d153fdb..11c9365 100644
+--- a/utils/helpers.py
++++ b/utils/helpers.py
+@@ -4,7 +4,8 @@ import polars as pl
+ # SNIPPET 1: Limpieza de moneda con REGEX
+ def clean_currency(text: str) -> float:
+     """Extrae números de un string sucio (ej: '$1.200,50 USD')"""
+-    if text is None: return 0.0
++    if text is None:
++        return 0.0
+     # Eliminamos todo lo que no sea número o punto decimal
+     clean_val = re.sub(r'[^\d.]', '', str(text))
+     return float(clean_val) if clean_val else 0.0
+diff --git a/verificador_ops.py b/verificador_ops.py
+index 8e48149..8f04fd9 100644
+--- a/verificador_ops.py
++++ b/verificador_ops.py
+@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
+ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ sys.path.insert(0, BASE_DIR)
+ 
+-from core.analyzer import AnalizadorInventario
++from core.analyzer import AnalizadorInventario  # noqa: E402 (requiere sys.path.insert previo)
+ 
+ def auditoria_sistema():
+     logger.info("🔍 Iniciando protocolo de inspección MLOps...")
+-- 
+2.43.0
+

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE_DIR)
 
-from core.analyzer import AnalizadorInventario
+from core.analyzer import AnalizadorInventario  # noqa: E402 (requiere sys.path.insert previo)
 
 app = FastAPI(title="MLOps Inventory Backend - Cloud IA Ready")
 

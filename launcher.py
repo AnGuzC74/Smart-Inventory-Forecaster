@@ -33,8 +33,8 @@ def iniciar_sistema():
     # 2. Iniciar Streamlit
     print("📊 Iniciando interfaz de usuario...")
     app_path = os.path.join(BASE_DIR, "app.py")
-    # Ejecutamos el comando 'streamlit run app.py'
-    subprocess.Popen(["streamlit", "run", "app.py"], cwd=BASE_DIR)
+    # Ejecutamos el comando 'streamlit run app.py' usando la ruta absoluta ya calculada
+    subprocess.Popen(["streamlit", "run", app_path], cwd=BASE_DIR)
 
     print("\n🔥 Todo listo. Revisa tu navegador.")
 

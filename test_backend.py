@@ -7,8 +7,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from core.analyzer import AnalizadorInventario
-from core.data_manager import DataManager
+from core.analyzer import AnalizadorInventario  # noqa: E402 (requiere sys.path.insert previo)
+from core.data_manager import DataManager  # noqa: E402 (requiere sys.path.insert previo)
 
 def test_kmeans_and_pareto_flow():
     """Prueba que el procesamiento de datos y la segmentación K-Means funcionan de verdad y generan las columnas correspondientes."""

@@ -4,7 +4,8 @@ import polars as pl
 # SNIPPET 1: Limpieza de moneda con REGEX
 def clean_currency(text: str) -> float:
     """Extrae números de un string sucio (ej: '$1.200,50 USD')"""
-    if text is None: return 0.0
+    if text is None:
+        return 0.0
     # Eliminamos todo lo que no sea número o punto decimal
     clean_val = re.sub(r'[^\d.]', '', str(text))
     return float(clean_val) if clean_val else 0.0
