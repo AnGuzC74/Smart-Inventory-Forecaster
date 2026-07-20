@@ -1,3 +1,4 @@
+> ⚠️ **Esta rama fue consolidada en `feat/consolidacion-final-5943981312164777010`. Para la versión activa y recomendada, ve a esa rama.**
 # Smart Inventory Management System 📦🤖 (Rama: feat/inventario-masivo-rich)
 
 Este repositorio contiene un sistema híbrido de inteligencia artificial para la gestión y predicción de inventarios industriales. Combina modelos de Machine Learning tradicionales con las capacidades de razonamiento de Grandes Modelos de Lenguaje (LLM).
